@@ -25,7 +25,7 @@ char buf[BUF_SIZE];
 char* parseToBytes(char *ints)    //Parse from iii,iii,iii,iii\n to bbbb
 {
     if(strlen(ints) > 16){
-        return "DEBUG: TOO LARGE";
+        return ">DEBUG: TOO LARGE";
     }
     char split[4][4];
     char *int_literal, *num;
@@ -125,9 +125,9 @@ void rangefinderSetup(){
 void sendRangefinder(){
   float distance = getDistance();
   if (distance >= RANGEFINDER_MAX_DISTANCE || distance <= 0){
-    Serial.println("DEBUG: Out of range");
+    Serial.println(">DEBUG: Out of range");
   } else {
-    Serial.print("("); Serial.print(distance); Serial.print(","); Serial.print(distance); Serial.print(")");
+    Serial.print(">("); Serial.print(distance); Serial.print(","); Serial.print(distance); Serial.print(")");
     Serial.println();
     // Serial.println("cm");
   }
@@ -141,10 +141,10 @@ void sendRangefinder(){
 void setup() 
 { 
   Serial.begin(BAUD_RATE);
-  Serial.println("DEBUG: Arduino relay begin");
+  Serial.println(">DEBUG: Arduino relay begin");
   pwmSetup();
   rangefinderSetup();
-  Serial.println("DEBUG: Arduino relay setup finished");
+  Serial.println(">DEBUG: Arduino relay setup finished");
 } 
 
 void loop() 

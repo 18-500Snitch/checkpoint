@@ -6,6 +6,7 @@ import constants
 import math
 
 HOVER_CONSTANT = 100 # the value at which the quad is barely hovering
+BASE_SPEED = 100000 # ele/til = BASE_SPEED/min_distance
 
 # finished implementation
 # not tested
@@ -48,9 +49,9 @@ class ControlNode:
                     angle = datapoint.angle
 
         if (angle >= 0):
-            speed = 100.0 / min_distance
-            y = -speed * math.sin(angle)
-            x = -speed * math.cos(angle)
+            speed = BASE_SPEED / min_distance
+            y = int(-speed * math.sin(angle))
+            x = int(-speed * math.cos(angle))
         else:
             (x, y) = (0, 0)
 
