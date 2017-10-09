@@ -11,11 +11,14 @@ import threading
 import ast
 import time
 
+DEFAULT_RANGEFINDER     =  (400,400) # maximum range of RPLidar
+DEFAULT_RANGEFINDER_STR = "(400,400)" # maximum range of RPLidar
+
 
 class ArduinoNode:
   def __init__(self, topics):
     self.topics = topics
-    self.incoming = [(100,100)]
+    self.incoming = [DEFAULT_RANGEFINDER]
     
     
     self.ser = serial.Serial('/dev/ttyUSB1') # open serial port
@@ -55,7 +58,7 @@ def processSerial(incoming, string):
   string = string.split(">",1)[1] # starting character
   if string == "": return
   if not(string.startswith("DEBUG:")):
-    result = "(100,100)" # default value
+    result = DEFAULT_RANGEFINDER_STR
     try:
       print string # for debug
       incoming[constants.STDIN_INDEX] = ast.literal_eval(string)
