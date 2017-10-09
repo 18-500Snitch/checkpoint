@@ -104,7 +104,7 @@ void pwmSetup(){
 #define RANGEFINDER_MAX_DISTANCE 400 // in cm, datasheet says 400cm
 #define RANGEFINDER_PULSE_WIDTH 10 // in us, datasheet recommends 10us
 #define RANGEFINDER_INITIAL_DELAY 2 // in us
-#define RANGEFINDER_TIMEOUT 250
+#define RANGEFINDER_TIMEOUT 250000
 float getDistance(){
   static long prevTrigger;
   while (millis() < prevTrigger + RANGEFINDER_PERIOD){}
