@@ -21,7 +21,7 @@ class RPLidarNode:
 
         self.incoming = [[(0,0,0)]]
 
-        self.proc = subprocess.Popen("$HOME/sdk/output/Linux/Release/ultra_simple 8", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+        self.proc = subprocess.Popen("$HOME/checkpoint/rplidar_sdk/output/Linux/Release/ultra_simple 8", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
 
         Thread(target=self.stream_watcher, name='stdout-watcher', args=('STDOUT', self.proc.stdout)).start()
 
