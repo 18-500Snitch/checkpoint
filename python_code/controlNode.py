@@ -17,8 +17,16 @@ class ControlNode:
 
     def loop(self):
         (x,y,z) = (0,0,0)
+		
         arduRange = (self.topics[constants.RANGEFINDER_TOPIC][0] + self.topics[constants.RANGEFINDER_TOPIC][1])/2
-        if   self.topics[constants.BEHAVIOR_TOPIC] == constants.BEHAVIOR_OFF:
+		z = respondRangefinder(arduRange)
+        (x,y) = respondRPLidar(self.topics[RPLIDAR_TOPIC])
+
+        self.topics[constants.QUAD_TOPIC] = self.filter(x, y, z)
+
+    @staticmethod
+    def respondRangefinder(data):
+	    if   self.topics[constants.BEHAVIOR_TOPIC] == constants.BEHAVIOR_OFF:
             pass
         elif self.topics[constants.BEHAVIOR_TOPIC] == constants.BEHAVIOR_HOVER:
             (x, y) = self.respondRPLidar(self.topics[constants.RPLIDAR_TOPIC])
@@ -34,9 +42,7 @@ class ControlNode:
             assert False # not yet implemented
         else:
             assert False
-
-        self.topics[constants.QUAD_TOPIC] = self.filter(x, y, z)
-
+		
     @staticmethod
     def respondRPLidar(data):
 
