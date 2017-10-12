@@ -7,6 +7,7 @@ import math
 
 HOVER_CONSTANT = 100 # the value at which the quad is barely hovering
 BASE_SPEED = 100000 # ele/til = BASE_SPEED/min_distance
+MIN_DISTANCE = 
 
 # finished implementation
 # not tested
@@ -65,11 +66,14 @@ class ControlNode:
 
     @staticmethod
     def filter( x, y, z):
-        if x > 100: x = 100
-        if x < -100: x = -100
-
-        if y > 100: y = 100
-        if y < -100: y = -100
+	if(abs(x) > abs(y) && abs(x) > 100):
+	   scaleFactor = abs(x) / 100
+	   x = x / scaleFactor
+	   y = y / scaleFactor
+	elif(abs(x) < abs(y) && abs(y) > 100):
+	   scaleFactor = abs(y) / 100
+	   x = x / scaleFactor
+	   y = y / scaleFactor
 
         if z > 200: z = 200
 
