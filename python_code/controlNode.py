@@ -17,18 +17,18 @@ class ControlNode:
 
     def loop(self):
         (x,y,z) = (0,0,0)
-        rplidar = (self.topics[constants.RANGEFINDER_TOPIC][0] + self.topics[constants.RANGEFINDER_TOPIC][1])/2
+        arduRange = (self.topics[constants.RANGEFINDER_TOPIC][0] + self.topics[constants.RANGEFINDER_TOPIC][1])/2
         if   self.topics[constants.BEHAVIOR_TOPIC] == constants.BEHAVIOR_OFF:
             pass
         elif self.topics[constants.BEHAVIOR_TOPIC] == constants.BEHAVIOR_HOVER:
             (x, y) = self.respondRPLidar(self.topics[constants.RPLIDAR_TOPIC])
-            z = 100 - rplidar
+            z = 100 - arduRange
             z = z + HOVER_CONSTANT
         elif self.topics[constants.BEHAVIOR_TOPIC] == constants.BEHAVIOR_RESTING:
-            if (rplidar < 10):
+            if (arduRange < 10):
                 z = 0
-            elif (rplidar > 10):
-                z = 10 - rplidar
+            elif (arduRange > 10):
+                z = 10 - arduRange
                 z = z + HOVER_CONSTANT
         elif self.topics[constants.BEHAVIOR_TOPIC] == constants.BEHAVIOR_RANDOM:
             assert False # not yet implemented
