@@ -17,20 +17,19 @@ class ControlNode:
         (self.x, self.y, self.z) = (0, 0, 0)
 
     def loop(self):
-        (x,y,z) = (0,0,0)
+        (self.x,self.y,self.z) = (0,0,0)
 		
         arduRange = (self.topics[constants.RANGEFINDER_TOPIC][0] + self.topics[constants.RANGEFINDER_TOPIC][1])/2
-		z = respondRangefinder(arduRange)
-        (x,y) = respondRPLidar(self.topics[RPLIDAR_TOPIC])
+        self.respondRangefinder(arduRange)
+        self.respondRPLidar()
 
-        self.topics[constants.QUAD_TOPIC] = self.filter(x, y, z)
+        self.topics[constants.QUAD_TOPIC] = self.filter()
 
-    @staticmethod
-    def respondRangefinder(data):
-	    if   self.topics[constants.BEHAVIOR_TOPIC] == constants.BEHAVIOR_OFF:
-            pass
+    def respondRangefinder(self,arduRange):
+        z = 0
+        if self.topics[constants.BEHAVIOR_TOPIC] == constants.BEHAVIOR_OFF:
+        pass
         elif self.topics[constants.BEHAVIOR_TOPIC] == constants.BEHAVIOR_HOVER:
-            (x, y) = self.respondRPLidar(self.topics[constants.RPLIDAR_TOPIC])
             z = 100 - arduRange
             z = z + HOVER_CONSTANT
         elif self.topics[constants.BEHAVIOR_TOPIC] == constants.BEHAVIOR_RESTING:
@@ -43,38 +42,52 @@ class ControlNode:
             assert False # not yet implemented
         else:
             assert False
+        self.z = z
 		
-    @staticmethod
-    def respondRPLidar(data):
+    def respondRPLidar(self):
+        data = self.topics[RPLIDAR_TOPIC])
+        x = 0
+        y = 0
+        if self.topics[constants.BEHAVIOR_TOPIC] == constants.BEHAVIOR_OFF:
+        pass
+        elif self.topics[constants.BEHAVIOR_TOPIC] == constants.BEHAVIOR_HOVER:
+            min_distance = -1
+            angle = -1
+            for datapoint in data:
+                if datapoint.valid:
+                    if (min_distance == -1 or min_distance > datapoint.distance):
+                        min_distance = datapoint.distance
+                        angle = datapoint.angle
 
-        min_distance = -1
-        angle = -1
-        for datapoint in data:
-            if datapoint.valid:
-                if (min_distance == -1 or min_distance > datapoint.distance):
-                    min_distance = datapoint.distance
-                    angle = datapoint.angle
-
-        if (angle >= 0):
-            speed = BASE_SPEED / min_distance
-            y = int(-speed * math.sin(angle))
-            x = int(-speed * math.cos(angle))
+            if (angle >= 0):
+                speed = BASE_SPEED / min_distance
+                y = int(-speed * math.sin(angle))
+                x = int(-speed * math.cos(angle))
+            else:
+                 (x, y) = (0, 0)
+        elif self.topics[constants.BEHAVIOR_TOPIC] == constants.BEHAVIOR_RESTING:
+            (x,y) = (0,0)
+        elif self.topics[constants.BEHAVIOR_TOPIC] == constants.BEHAVIOR_RANDOM:
+            assert False # not yet implemented
         else:
-            (x, y) = (0, 0)
+            assert False
 
-        return x, y
+        self.x = x
+        self.y = y
 
-    @staticmethod
-    def filter( x, y, z):
-	if(abs(x) > abs(y) && abs(x) > 100):
-	   scaleFactor = abs(x) / 100
-	   x = x / scaleFactor
-	   y = y / scaleFactor
-	elif(abs(x) < abs(y) && abs(y) > 100):
-	   scaleFactor = abs(y) / 100
-	   x = x / scaleFactor
-	   y = y / scaleFactor
-
+    def filter(self):
+        x = self.x
+        y = self.y
+        z = self.z
+        if(abs(x) > abs(y) && abs(x) > 100):
+            scaleFactor = abs(x) / 100
+            x = x / scaleFactor
+            y = y / scaleFactor
+        elif(abs(x) < abs(y) && abs(y) > 100):
+            scaleFactor = abs(y) / 100
+            x = x / scaleFactor
+            y = y / scaleFactor
+        
         if z > 200: z = 200
 
         return x, y, z, 0
