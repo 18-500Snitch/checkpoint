@@ -79,11 +79,11 @@ class ControlNode:
         x = self.x
         y = self.y
         z = self.z
-        if(abs(x) > abs(y) && abs(x) > 100):
+        if(abs(x) > abs(y) and abs(x) > 100):
             scaleFactor = abs(x) / 100
             x = x / scaleFactor
             y = y / scaleFactor
-        elif(abs(x) < abs(y) && abs(y) > 100):
+        elif(abs(x) < abs(y) and abs(y) > 100):
             scaleFactor = abs(y) / 100
             x = x / scaleFactor
             y = y / scaleFactor
