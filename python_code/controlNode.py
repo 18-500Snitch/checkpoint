@@ -7,7 +7,6 @@ import math
 
 HOVER_CONSTANT = 100 # the value at which the quad is barely hovering
 BASE_SPEED = 100000 # ele/til = BASE_SPEED/min_distance
-MIN_DISTANCE = 
 
 # finished implementation
 # not tested
@@ -28,7 +27,7 @@ class ControlNode:
     def respondRangefinder(self,arduRange):
         z = 0
         if self.topics[constants.BEHAVIOR_TOPIC] == constants.BEHAVIOR_OFF:
-        pass
+            pass
         elif self.topics[constants.BEHAVIOR_TOPIC] == constants.BEHAVIOR_HOVER:
             z = 100 - arduRange
             z = z + HOVER_CONSTANT
@@ -45,11 +44,11 @@ class ControlNode:
         self.z = z
 		
     def respondRPLidar(self):
-        data = self.topics[RPLIDAR_TOPIC])
+        data = self.topics[constants.RPLIDAR_TOPIC]
         x = 0
         y = 0
         if self.topics[constants.BEHAVIOR_TOPIC] == constants.BEHAVIOR_OFF:
-        pass
+            pass
         elif self.topics[constants.BEHAVIOR_TOPIC] == constants.BEHAVIOR_HOVER:
             min_distance = -1
             angle = -1
