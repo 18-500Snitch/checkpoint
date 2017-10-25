@@ -21,7 +21,7 @@ class ArduinoNode:
     self.incoming = [DEFAULT_RANGEFINDER]
     
     
-    self.ser = serial.Serial('/dev/ttyUSB1') # open serial port
+    self.ser = serial.Serial('/dev/arduino') # open serial port
     print self.ser.name
     threading.Thread(target=serialWatcher, name='serial-watcher', args=[self.ser, self.incoming]).start()
 

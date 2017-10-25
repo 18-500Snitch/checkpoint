@@ -178,7 +178,7 @@ int main(int argc, const char * argv[]) {
         // use default com port
         opt_com_path = "\\\\.\\com3";
 #else
-        opt_com_path = "/dev/ttyUSB0";
+        opt_com_path = "/dev/rplidar";
 #endif
     }
 
