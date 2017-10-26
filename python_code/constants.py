@@ -18,7 +18,7 @@ STDIN_INDEX = 0
 STDOUT_INDEX = 1
 STDERR_INDEX = 2
 
-FREQUENCY = 0.5
+FREQUENCY = 1.0/20
 
 
 class RPLidarDatapoint:

@@ -23,7 +23,9 @@ class ArduinoNode:
     
     self.ser = serial.Serial('/dev/arduino') # open serial port
     print self.ser.name
-    threading.Thread(target=serialWatcher, name='serial-watcher', args=[self.ser, self.incoming]).start()
+    thread = threading.Thread(target=serialWatcher, name='serial-watcher', args=[self.ser, self.incoming])
+    thread.daemon = True
+    thread.start
 
   def loop(self):
     # send pwm output
@@ -48,8 +50,8 @@ def serialWatcher(ser, incoming):
         string += str(c) # add stuff
       else: # now that the line has been completely sent
         processSerial(incoming, string)
-        string = ""
-    
+        string = ""    
+      time.sleep(constants.FREQUENCY)
   finally:
     ser.close()
 
@@ -64,5 +66,4 @@ def processSerial(incoming, string):
       incoming[constants.STDIN_INDEX] = ast.literal_eval(string)
     finally: 
       print "arduino finally"
-  time.sleep(constants.FREQUENCY)
 

@@ -76,6 +76,7 @@ void sendRPLidarData(int nodes[][3], int len){
     if (pos != len-1) {printf(",");}
   }
   printf("]\n");
+  fflush(stdout);
 }
 
 
