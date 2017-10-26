@@ -41,3 +41,5 @@ python_code\.idea\workspace.xml
 *.out
 *.app
 python_code/.idea/workspace.xml
+python_code/.idea/workspace.xml
+*.xml
