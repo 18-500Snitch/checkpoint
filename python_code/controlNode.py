@@ -6,7 +6,7 @@ import constants
 import math
 
 HOVER_CONSTANT = 100 # the value at which the quad is barely hovering
-DROP_CONSTANT = 10
+DROP_CONSTANT = 10 # HOVER_CONSTANT-DROP_CONSTANT = slowly dropping
 HOVER_HEIGHT = 100
 BASE_SPEED = 100000 # ele/til = BASE_SPEED/min_distance
 
@@ -20,26 +20,36 @@ class ControlNode:
     def loop(self):
         (self.x,self.y,self.z) = (0,0,0)
         command = self.topics[constants.BEHAVIOR_TOPIC]
+        arduRange = (self.topics[constants.RANGEFINDER_TOPIC][0] + self.topics[constants.RANGEFINDER_TOPIC][1])/2
 
         if command == constants.BEHAVIOR_OFF:
             pass
         elif command == constants.BEHAVIOR_HOVER:
-            arduRange = (self.topics[constants.RANGEFINDER_TOPIC][0] + self.topics[constants.RANGEFINDER_TOPIC][1])/2
             self.respondRangefinder(arduRange,True)
             self.respondRPLidar()
             self.topics[constants.QUAD_TOPIC] = self.filter()
         elif command == constants.BEHAVIOR_RESTING:
-            arduRange = (self.topics[constants.RANGEFINDER_TOPIC][0] + self.topics[constants.RANGEFINDER_TOPIC][1])/2
             self.respondRangefinder(arduRange,False)
             self.topics[constants.QUAD_TOPIC] = self.filter()
         elif command == constants.BEHAVIOR_ARM:
             self.topics[constants.QUAD_TOPIC] = constants.RPLIDAR_ARM
         elif command == constants.BEHAVIOR_DISARM:
             self.topics[constants.QUAD_TOPIC] = constants.RPLIDAR_DISARM
-        elif command == constants.BEHAVIOR_NULL:
-            assert False # should never happen
+        elif command == constants.BEHAVIOR_TEST_RANGEFINDER:
+            # hovers at HOVER_HEIGHT without response to rplidar
+            # used for testing the rangefinder control loop
+            self.respondRangefinder(arduRange,True)
+            self.topics[constants.QUAD_TOPIC] = self.filter()
+        elif command == constants.BEHAVIOR_TEST_RPLIDAR:
+            # turn on throttle, but not enough to achieve flight, causing the quadcopter to act as a hovercraft
+            # used for testing the rplidar without achieving flight
+            self.z = HOVER_CONSTANT-DROP_CONSTANT
+            self.respondRPLidar()
+            self.topics[constants.QUAD_TOPIC] = self.filter()
         elif command == constants.BEHAVIOR_RANDOM:
             assert False # not yet implemented
+        elif command == constants.BEHAVIOR_NULL:
+            assert False # should never happen
         else:
             assert False
 
