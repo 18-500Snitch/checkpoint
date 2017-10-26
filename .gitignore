@@ -4,6 +4,7 @@
 #======== additional python stuff==============
 
 *.pyc
+workspace.xml
 
 #======== default C stuff========
 
