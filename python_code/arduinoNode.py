@@ -51,7 +51,7 @@ def serialWatcher(ser, incoming):
       else: # now that the line has been completely sent
         processSerial(incoming, string)
         string = ""    
-      time.sleep(constants.FREQUENCY)
+      # time.sleep(constants.FREQUENCY)
   finally:
     ser.close()
 
