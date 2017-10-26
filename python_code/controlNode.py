@@ -6,6 +6,7 @@ import constants
 import math
 
 HOVER_CONSTANT = 100 # the value at which the quad is barely hovering
+DROP_CONSTANT = 10
 HOVER_HEIGHT = 100
 BASE_SPEED = 100000 # ele/til = BASE_SPEED/min_distance
 
@@ -51,8 +52,7 @@ class ControlNode:
             if (arduRange < 10):
                 z = 0
             elif (arduRange > 10):
-                z = 10 - arduRange
-                z = z + HOVER_CONSTANT
+                z = HOVER_CONSTANT-DROP_CONSTANT
         else:
             assert False
         self.z = z
