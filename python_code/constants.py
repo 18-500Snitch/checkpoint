@@ -13,6 +13,11 @@ BEHAVIOR_HOVER = 1 # hover while avoiding objects
 BEHAVIOR_RANDOM = 2 # move randomly if no collision imminent
 BEHAVIOR_RESTING = 3 # landing
 BEHAVIOR_OFF = 4 # force off
+BEHAVIOR_ARM = 5
+BEHAVIOR_DISARM = 6
+
+RPLIDAR_DISARM = (0,0,0,-100)
+RPLIDAR_ARM    = (0,0,0, 100)
 
 STDIN_INDEX = 0
 STDOUT_INDEX = 1
