@@ -18,28 +18,41 @@ class ControlNode:
 
     def loop(self):
         (self.x,self.y,self.z) = (0,0,0)
-		
-        arduRange = (self.topics[constants.RANGEFINDER_TOPIC][0] + self.topics[constants.RANGEFINDER_TOPIC][1])/2
-        self.respondRangefinder(arduRange)
-        self.respondRPLidar()
+        command = self.topics[constants.BEHAVIOR_TOPIC]
 
-        self.topics[constants.QUAD_TOPIC] = self.filter()
-
-    def respondRangefinder(self,arduRange):
-        z = 0
-        if self.topics[constants.BEHAVIOR_TOPIC] == constants.BEHAVIOR_OFF:
+        if command == constants.BEHAVIOR_OFF:
             pass
-        elif self.topics[constants.BEHAVIOR_TOPIC] == constants.BEHAVIOR_HOVER:
+        elif command == constants.BEHAVIOR_HOVER:
+            arduRange = (self.topics[constants.RANGEFINDER_TOPIC][0] + self.topics[constants.RANGEFINDER_TOPIC][1])/2
+            self.respondRangefinder(arduRange,True)
+            self.respondRPLidar()
+            self.topics[constants.QUAD_TOPIC] = self.filter()
+        elif command == constants.BEHAVIOR_RESTING:
+            arduRange = (self.topics[constants.RANGEFINDER_TOPIC][0] + self.topics[constants.RANGEFINDER_TOPIC][1])/2
+            self.respondRangefinder(arduRange,False)
+            self.topics[constants.QUAD_TOPIC] = self.filter()
+        elif command == constants.BEHAVIOR_ARM:
+            self.topics[constants.QUAD_TOPIC] = constants.RPLIDAR_ARM
+        elif command == constants.BEHAVIOR_DISARM:
+            self.topics[constants.QUAD_TOPIC] = constants.RPLIDAR_DISARM
+        elif command == constants.BEHAVIOR_NULL:
+            assert False # should never happen
+        elif command == constants.BEHAVIOR_RANDOM:
+            assert False # not yet implemented
+        else:
+            assert False
+
+    def respondRangefinder(self,arduRange,behavior):
+        z = 0
+        if behavior == constants.BEHAVIOR_HOVER:
             z = HOVER_HEIGHT - arduRange
             z = z + HOVER_CONSTANT
-        elif self.topics[constants.BEHAVIOR_TOPIC] == constants.BEHAVIOR_RESTING:
+        elif behavior == constants.BEHAVIOR_RESTING:
             if (arduRange < 10):
                 z = 0
             elif (arduRange > 10):
                 z = 10 - arduRange
                 z = z + HOVER_CONSTANT
-        elif self.topics[constants.BEHAVIOR_TOPIC] == constants.BEHAVIOR_RANDOM:
-            assert False # not yet implemented
         else:
             assert False
         self.z = z
@@ -48,30 +61,20 @@ class ControlNode:
         data = self.topics[constants.RPLIDAR_TOPIC]
         x = 0
         y = 0
-        if self.topics[constants.BEHAVIOR_TOPIC] == constants.BEHAVIOR_OFF:
-            pass
-        elif self.topics[constants.BEHAVIOR_TOPIC] == constants.BEHAVIOR_HOVER:
-            min_distance = -1
-            angle = -1
-            for datapoint in data:
-                if datapoint.valid:
-                    if (min_distance == -1 or min_distance > datapoint.distance):
-                        min_distance = datapoint.distance
-                        angle = datapoint.angle
+        min_distance = -1
+        angle = -1
+        for datapoint in data:
+            if datapoint.valid:
+                if (min_distance == -1 or min_distance > datapoint.distance):
+                    min_distance = datapoint.distance
+                    angle = datapoint.angle
 
-            if (angle >= 0):
-                speed = BASE_SPEED / min_distance
-                y = int(-speed * math.sin(angle))
-                x = int(-speed * math.cos(angle))
-            else:
-                 (x, y) = (0, 0)
-        elif self.topics[constants.BEHAVIOR_TOPIC] == constants.BEHAVIOR_RESTING:
-            (x,y) = (0,0)
-        elif self.topics[constants.BEHAVIOR_TOPIC] == constants.BEHAVIOR_RANDOM:
-            assert False # not yet implemented
+        if (angle >= 0):
+            speed = BASE_SPEED / min_distance
+            y = int(-speed * math.sin(angle))
+            x = int(-speed * math.cos(angle))
         else:
-            assert False
-
+             (x, y) = (0, 0)
         self.x = x
         self.y = y
 
