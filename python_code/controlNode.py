@@ -9,7 +9,7 @@ HOVER_CONSTANT = 100 # the value at which the quad is barely hovering
 DROP_CONSTANT = 10 # HOVER_CONSTANT-DROP_CONSTANT = slowly dropping
 HOVER_HEIGHT = 100
 BASE_SPEED = 100000 # ele/til = BASE_SPEED/min_distance
-
+MAX_DISTANCE = 600 # The Distance that the quadcopter will start moving away from things 
 # finished implementation
 # not tested
 class ControlNode:
@@ -25,11 +25,11 @@ class ControlNode:
         if command == constants.BEHAVIOR_OFF:
             pass
         elif command == constants.BEHAVIOR_HOVER:
-            self.respondRangefinder(arduRange,True)
+            self.respondRangefinder(arduRange,command)
             self.respondRPLidar()
             self.topics[constants.QUAD_TOPIC] = self.filter()
         elif command == constants.BEHAVIOR_RESTING:
-            self.respondRangefinder(arduRange,False)
+            self.respondRangefinder(arduRange,command)
             self.topics[constants.QUAD_TOPIC] = self.filter()
         elif command == constants.BEHAVIOR_ARM:
             self.topics[constants.QUAD_TOPIC] = constants.RPLIDAR_ARM
@@ -38,7 +38,7 @@ class ControlNode:
         elif command == constants.BEHAVIOR_TEST_RANGEFINDER:
             # hovers at HOVER_HEIGHT without response to rplidar
             # used for testing the rangefinder control loop
-            self.respondRangefinder(arduRange,True)
+            self.respondRangefinder(arduRange,command)
             self.topics[constants.QUAD_TOPIC] = self.filter()
         elif command == constants.BEHAVIOR_TEST_RPLIDAR:
             # turn on throttle, but not enough to achieve flight, causing the quadcopter to act as a hovercraft
@@ -71,11 +71,11 @@ class ControlNode:
         data = self.topics[constants.RPLIDAR_TOPIC]
         x = 0
         y = 0
-        min_distance = -1
+        min_distance = MAX_DISTANCE
         angle = -1
         for datapoint in data:
             if datapoint.valid:
-                if (min_distance == -1 or min_distance > datapoint.distance):
+                if (min_distance > datapoint.distance):
                     min_distance = datapoint.distance
                     angle = datapoint.angle
 
