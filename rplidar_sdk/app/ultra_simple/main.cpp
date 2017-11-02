@@ -107,7 +107,7 @@ void doWithData(rplidar_response_measurement_node_t* nodes, size_t count, int re
     if (quality){
       int theta = (int)(nodes[pos].angle_q6_checkbit >> RPLIDAR_RESP_MEASUREMENT_ANGLE_SHIFT)/64;
       int bucket = theta/(360/resolution);
-      int dis = (int)(nodes[pos].distance_q2);
+      int dis = (int)(nodes[pos].distance_q2/4.0f);
       
       if (condensed[bucket][QUALITY] != DATA_GOOD || condensed[bucket][DISTANCE] > dis){
         condensed[bucket][DISTANCE] = dis;

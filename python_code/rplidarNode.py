@@ -22,7 +22,7 @@ class RPLidarNode:
 
         self.incoming = [[(0,0,0)]]
 
-        self.proc = subprocess.Popen("$HOME/checkpoint/rplidar_sdk/output/Linux/Release/ultra_simple 16", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+        self.proc = subprocess.Popen("$HOME/checkpoint/rplidar_sdk/output/Linux/Release/ultra_simple 8", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
 
         self.dataQueue = Queue.Queue()
         thread = Thread(target=self.stream_watcher, name='stdout-watcher', args=('STDOUT', self.proc.stdout))
