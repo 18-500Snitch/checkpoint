@@ -15,10 +15,13 @@ MAX_DISTANCE = 600 # The Distance that the quadcopter will start moving away fro
 class ControlNode:
     def __init__(self, topics):
         self.topics = topics
-        (self.x, self.y, self.z) = (0, 0, 0)
+	# positive roll is right
+	# positive pitch is forwards
+	# positive thrust is up
+        (self.roll, self.pitch, self.thrust) = (0, 0, 0)
 
     def loop(self):
-        (self.x,self.y,self.z) = (0,0,0)
+        (self.roll,self.pitch,self.thrust) = (0,0,0)
         command = self.topics[constants.BEHAVIOR_TOPIC]
         arduRange = (self.topics[constants.RANGEFINDER_TOPIC][0] + self.topics[constants.RANGEFINDER_TOPIC][1])/2
 
@@ -43,7 +46,7 @@ class ControlNode:
         elif command == constants.BEHAVIOR_TEST_RPLIDAR:
             # turn on throttle, but not enough to achieve flight, causing the quadcopter to act as a hovercraft
             # used for testing the rplidar without achieving flight
-            self.z = HOVER_CONSTANT-DROP_CONSTANT
+            self.thrust = HOVER_CONSTANT-DROP_CONSTANT
             self.respondRPLidar()
             self.topics[constants.QUAD_TOPIC] = self.filter()
         elif command == constants.BEHAVIOR_RANDOM:
@@ -54,23 +57,23 @@ class ControlNode:
             assert False
 
     def respondRangefinder(self,arduRange,behavior):
-        z = 0
+        thrust = 0
         if behavior == constants.BEHAVIOR_HOVER:
-            z = HOVER_HEIGHT - arduRange
-            z = z + HOVER_CONSTANT
+            thrust = HOVER_HEIGHT - arduRange
+            thrust = thrust + HOVER_CONSTANT
         elif behavior == constants.BEHAVIOR_RESTING:
             if (arduRange < 10):
-                z = 0
+                thrust = 0
             elif (arduRange > 10):
-                z = HOVER_CONSTANT-DROP_CONSTANT
+                thrust = HOVER_CONSTANT-DROP_CONSTANT
         else:
             assert False
-        self.z = z
+        self.thrust = thrust
 		
     def respondRPLidar(self):
         data = self.topics[constants.RPLIDAR_TOPIC]
-        x = 0
-        y = 0
+        roll = 0
+        pitch = 0
         min_distance = MAX_DISTANCE
         angle = -1
         for datapoint in data:
@@ -81,26 +84,26 @@ class ControlNode:
 
         if (angle >= 0):
             speed = BASE_SPEED
-            y = int(-speed * math.sin(angle))
-            x = int(-speed * math.cos(angle))
+            pitch = int(-speed * math.cos(angle))
+            roll = int(-speed * math.sin(angle))
         else:
-             (x, y) = (0, 0)
-        self.x = x
-        self.y = y
+             (roll, pitch) = (0, 0)
+        self.roll = roll
+        self.pitch = pitch
 
     def filter(self):
-        x = self.x
-        y = self.y
-        z = self.z
-        if(abs(x) > abs(y) and abs(x) > 100):
-            scaleFactor = abs(x) / 100
-            x = x / scaleFactor
-            y = y / scaleFactor
-        elif(abs(x) < abs(y) and abs(y) > 100):
-            scaleFactor = abs(y) / 100
-            x = x / scaleFactor
-            y = y / scaleFactor
+        roll = self.roll
+        pitch = self.pitch
+        thrust = self.thrust
+        if(abs(roll) > abs(pitch) and abs(roll) > 100):
+            scaleFactor = abs(roll) / 100
+            roll = roll / scaleFactor
+            pitch = pitch / scaleFactor
+        elif(abs(roll) < abs(pitch) and abs(pitch) > 100):
+            scaleFactor = abs(pitch) / 100
+            roll = roll / scaleFactor
+            pitch = pitch / scaleFactor
         
-        if z > 200: z = 200
+        if thrust > 200: thrust = 200
 
-        return x, y, z, 0
+        return roll, pitch, thrust, 0
