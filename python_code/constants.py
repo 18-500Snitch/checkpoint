@@ -8,15 +8,15 @@ RPLIDAR_TOPIC = "RPLidar"  # [rplidarDatapoint]
 QUAD_TOPIC = "Quad"  # (ail, ele, thr, rud)
 RANGEFINDER_TOPIC = "Rangefinder"  # (left, right)
 
-BEHAVIOR_NULL = 0 # invalid response
-BEHAVIOR_HOVER = 1 # hover while avoiding objects
-BEHAVIOR_RANDOM = 2 # move randomly if no collision imminent
-BEHAVIOR_RESTING = 3 # landing
-BEHAVIOR_OFF = 4 # force off
-BEHAVIOR_ARM = 5
-BEHAVIOR_DISARM = 6
-BEHAVIOR_TEST_RANGEFINDER = 7
-BEHAVIOR_TEST_RPLIDAR = 8
+BEHAVIOR_NULL = "NULL" # invalid response
+BEHAVIOR_HOVER = "HOVER" # hover while avoiding objects
+BEHAVIOR_RANDOM = "RANDOM" # move randomly if no collision imminent
+BEHAVIOR_RESTING = "RESTING" # landing
+BEHAVIOR_OFF = "OFF" # force off
+BEHAVIOR_ARM = "ARM"
+BEHAVIOR_DISARM = "DISARM"
+BEHAVIOR_TEST_RANGEFINDER = "RANGEFINDER"
+BEHAVIOR_TEST_RPLIDAR = "RPLIDAR"
 
 RPLIDAR_DISARM = (0,0,-5,98)
 RPLIDAR_ARM    = (0,0,-5,-98)
