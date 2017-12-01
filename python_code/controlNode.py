@@ -4,6 +4,10 @@
 
 import constants
 import math
+import os
+import sys
+
+PIPE_PATH = "/tmp/rplidar.fifo"
 
 HOVER_CONSTANT = 100 # the value at which the quad is barely hovering
 DROP_CONSTANT = 10 # HOVER_CONSTANT-DROP_CONSTANT = slowly dropping
@@ -19,6 +23,9 @@ class ControlNode:
 	# positive pitch is forwards
 	# positive thrust is up
         (self.roll, self.pitch, self.thrust) = (0, 0, 0)
+        # only want to create pipe once, should not assume which node creates first
+        if not os.path.exists(PIPE_PATH):
+            os.mkfifo(PIPE_PATH)
 
     def loop(self):
         (self.roll,self.pitch,self.thrust) = (0,0,0)
@@ -70,26 +77,31 @@ class ControlNode:
             assert False
         self.thrust = thrust
 		
+    # TODO: FIFO
     def respondRPLidar(self):
-        data = self.topics[constants.RPLIDAR_TOPIC]
-        roll = 0
-        pitch = 0
-        min_distance = MAX_DISTANCE
-        angle = -1
-        for datapoint in data:
-            if datapoint.valid:
-                if (min_distance > datapoint.distance):
-                    min_distance = datapoint.distance
-                    angle = datapoint.angle
+        # data = self.topics[constants.RPLIDAR_TOPIC]
+        fifo = open(path, os.O_RDONLY)
+        for line in fifo:
+            print line
+        fifo.close()
+#        roll = 0
+#        pitch = 0
+#        min_distance = MAX_DISTANCE
+#        angle = -1
+#        for datapoint in data:
+#            if datapoint.valid:
+#                if (min_distance > datapoint.distance):
+#                    min_distance = datapoint.distance
+#                    angle = datapoint.angle
 
-        if (angle >= 0):
-            speed = BASE_SPEED
-            pitch = int(-speed * math.cos(angle))
-            roll = int(-speed * math.sin(angle))
-        else:
-             (roll, pitch) = (0, 0)
-        self.roll = roll
-        self.pitch = pitch
+#        if (angle >= 0):
+#            speed = BASE_SPEED
+#            pitch = int(-speed * math.cos(angle))
+#            roll = int(-speed * math.sin(angle))
+#        else:
+#             (roll, pitch) = (0, 0)
+#        self.roll = roll
+#        self.pitch = pitch
 
     def filter(self):
         roll = self.roll
