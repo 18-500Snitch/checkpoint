@@ -23,6 +23,7 @@ class ControlNode:
 	# positive pitch is forwards
 	# positive thrust is up
         (self.roll, self.pitch, self.thrust) = (0, 0, 0)
+        # FIFO
         # only want to create pipe once, should not assume which node creates first
         if not os.path.exists(PIPE_PATH):
             os.mkfifo(PIPE_PATH)
