@@ -82,14 +82,16 @@ class ControlNode:
         self.thrust = thrust
 		
     def respondRPLidar(self):
+        # FIFO
         # read data from rplidar_ros through fifo
         fifo = os.open(PIPE_PATH, os.O_RDONLY)
         rplidar_str = os.read(fifo, MAX_BUF)
         os.close(fifo)
         # parse string into data
-        rplidar_data = [float(data) for data in rplidar_str.split()]
+        rplidar_data = [float(data) for data in (rplidar_str.replace('\x00', '')).split()]
         (angle_min, angle_max, angle_inc) = rplidar_data[0:META]
         rplidar_data = rplidar_data[META:]
+        index = int(round(angle_max / angle_inc))
         # find nearest distance and angle
         near_only = [(theta, d) for (d, theta) in 
             enumerate(rplidar_data) if(d > 0)]
