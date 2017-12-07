@@ -2,37 +2,36 @@
 # usage: start node
 #
 
+import constants
+import threading
 import socket
 import ast
 import time
 
-def runCVReceiver(output):
-  
-  UDP_IP = "127.0.0.1"
-  UDP_PORT = 5005
 
-  sock = socket.socket(socket.AF_INET, # Internet
-                     socket.SOCK_DGRAM) # UDP
-  sock.bind((UDP_IP, UDP_PORT))
+class UdpNode:
+    def __init__(self, topics):
+        self.topics = topics
+        self.incoming = ["0\n"]
+        UDP_IP = "0.0.0.0"
+        UDP_PORT = 5005
+        self.sock = socket.socket(socket.AF_INET, # Internet
+                            socket.SOCK_DGRAM) # UDP
+        self.sock.bind((UDP_IP, UDP_PORT))
+        
+        thread = threading.Thread(target=udpWatcher, name='udp-watcher', args=[self.sock, self.incoming])
+        thread.daemon = True
+        thread.start()
 
-  print "setup done"
-  
-  while True:
-    data, addr = sock.recvfrom(1024) # buffer size is 1024 bytes
-    doWithCV(data, output)
-    time.sleep(1)
+    def loop(self):
+        # recieve input
+        msg = self.incoming[constants.STDIN_INDEX]
+        self.topics[constants.UDP_TOPIC] = msg
 
-def doWithCV(message, output):
-  try:
 
-    # print "received message:", message
-    output[0] = ast.literal_eval(message)
-    # print "coordinates[0]", coordinates[0]
-    # print "coordinates[1]", coordinates[1]
-  
-    # post to cv_coordinates topic
-  finally:
-    pass
-
-# for testing (delete after implementing node)
-#runCVReceiver()
+def udpWatcher(sock,incoming):
+    
+    while True:
+        data, addr = sock.recvfrom(1024) # buffer size is 1024 bytes
+        if data:
+            incoming[constants.STDIN_INDEX] = data

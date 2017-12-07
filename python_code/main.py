@@ -6,20 +6,20 @@ import rosLib
 
 import constants
 
-import executiveNode
 import controlNode
 import rplidarNode
 import arduinoNode
+import udpNode
 
 topics = {constants.RPLIDAR_TOPIC:[],
           constants.QUAD_TOPIC:(0,0,0,0),
           constants.RANGEFINDER_TOPIC:(0,0),
-          constants.BEHAVIOR_TOPIC:constants.BEHAVIOR_OFF}
+          constants.UDP_TOPIC:[]}
 
 nodes = [rplidarNode.RPLidarNode(topics),
          arduinoNode.ArduinoNode(topics),
          controlNode.ControlNode(topics),
-         executiveNode.ExecutiveNode(topics),
+         udpNode.UdpNode
         ]
 
 master = rosLib.Master(nodes, topics)

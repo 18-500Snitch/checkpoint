@@ -1,7 +1,7 @@
+#include <NewPing.h>
 //
 
-//==========PWM STUFF================
-
+//==========PPM STUFF================
 //////////////////////CONFIGURATION///////////////////////////////
 #define CHANNEL_NUMBER 12  //set the number of chanels
 #define CHANNEL_DEFAULT_VALUE 1500  //set the default servo value
@@ -14,9 +14,21 @@
   change theese values in your code (usually servo values move between 1000 and 2000)*/
 int ppm[CHANNEL_NUMBER];
 
-#define BUF_SIZE 21
+#define BUF_SIZE 25
 char buf[BUF_SIZE];
-void parseToInts(char *ints,int *out)    //Parse from iiii,iiii,iiii,iiii\n to ints
+
+//================rangefinder stuff==============
+#define TRIGGER_PIN   12
+#define ECHO_PIN      11
+#define MAX_DISTANCE  200
+
+NewPing sonar(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE);
+unsigned int pingSpeed = 50;
+unsigned long pingTimer;
+unsigned int pingDist = 0;
+
+//Parse from iiii,iiii,iiii,iiii\n to ints
+void parseToInts(char *ints,int *out)
 {
     if(strlen(ints) > 21){
         Serial.println(">DEBUG: TOO LARGE");
@@ -56,11 +68,11 @@ void parseSerialToPPM(){
     //Serial.print("buf:"); Serial.println(buf);
     parseToInts(buf,ppm);
   
-    Serial.print("parsed:"); 
-    Serial.print((int)ppm[0]); Serial.print(",");
-    Serial.print((int)ppm[1]); Serial.print(","); 
-    Serial.print((int)ppm[2]); Serial.print(",");
-    Serial.print((int)ppm[3]); Serial.print("\n");
+    //Serial.print("parsed:"); 
+    //Serial.print((int)ppm[0]); Serial.print(",");
+    //Serial.print((int)ppm[1]); Serial.print(","); 
+    //Serial.print((int)ppm[2]); Serial.print(",");
+    //Serial.print((int)ppm[3]); Serial.print("\n");
     for (int j=0; j<BUF_SIZE; j++){
       buf[j] = 0;
     }
@@ -72,8 +84,6 @@ void ppmSetup(){
   for (int i = 0; i < CHANNEL_NUMBER; i++) {
     ppm[i] = CHANNEL_DEFAULT_VALUE;
   }
-  //ppm[2] = 1500;
-  //ppm[3] = 1500;
 
   pinMode(sigPin, OUTPUT);
   digitalWrite(sigPin, !onState);  //set the PPM signal pin to the default state (off)
@@ -89,49 +99,28 @@ void ppmSetup(){
   sei();
 }
 
-//================rangefinder stuff==============
- 
-#define RANGEFINDER_TRIG_PIN 7
-#define RANGEFINDER_ECHO_PIN 6
-
-#define RANGEFINDER_SPEED_OF_SOUND 30 // cm per us
-#define RANGEFINDER_PERIOD 100 // in ms, datasheet recommends 60ms
-#define RANGEFINDER_MAX_DISTANCE 400 // in cm, datasheet says 400cm
-#define RANGEFINDER_PULSE_WIDTH 10 // in us, datasheet recommends 10us
-#define RANGEFINDER_INITIAL_DELAY 2 // in us
-#define RANGEFINDER_TIMEOUT 250000
-float getDistance(){
-  static double res;
-  static long prevTrigger;
-  if(millis() < prevTrigger + RANGEFINDER_PERIOD){return res;}
-  prevTrigger = millis();
-  
-  digitalWrite(RANGEFINDER_TRIG_PIN, LOW); delayMicroseconds(2);
-  digitalWrite(RANGEFINDER_TRIG_PIN, HIGH); delayMicroseconds(10); digitalWrite(RANGEFINDER_TRIG_PIN, LOW);
-  double ttl = pulseIn(RANGEFINDER_ECHO_PIN, HIGH, RANGEFINDER_TIMEOUT);
-  res = (ttl/2) / RANGEFINDER_SPEED_OF_SOUND;
-  return res;
-}
-
-void rangefinderSetup(){ 
-  pinMode(RANGEFINDER_TRIG_PIN, OUTPUT);
-  pinMode(RANGEFINDER_ECHO_PIN, INPUT);
+void rangefinderSetup(){
+  pingTimer = millis();
 }
 
 void sendRangefinder(){
   static float oldDistance;
-  float distance = getDistance();
-  if(oldDistance == distance)
+  if(oldDistance == pingDist)
   {
     return;
   }
-  oldDistance = distance;
-  if (distance >= RANGEFINDER_MAX_DISTANCE || distance <= 0){
+  oldDistance = pingDist;
+  if (oldDistance >= MAX_DISTANCE || oldDistance <= 0){
     Serial.println(">DEBUG: Out of range");
   } else {
-    Serial.print(">("); Serial.print(distance); Serial.print(","); Serial.print(distance); Serial.print(")");
+    Serial.print(">("); Serial.print(oldDistance); Serial.print(","); Serial.print(oldDistance); Serial.print(")");
     Serial.println();
-    // Serial.println("cm");
+  }
+}
+
+void echoCheck () {
+  if (sonar.check_timer()) {
+    pingDist = sonar.ping_result / US_ROUNDTRIP_CM;
   }
 }
 
@@ -150,9 +139,15 @@ void setup()
 
 void loop() 
 {
+  if (millis() >= pingTimer)
+  {
+    pingTimer += pingSpeed;
+    sonar.ping_timer(echoCheck);
+  }
   parseSerialToPPM();
   //sendRangefinder();
 }
+
 
 ISR(TIMER1_COMPA_vect) { //leave this alone
   static boolean state = true;

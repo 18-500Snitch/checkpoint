@@ -11,8 +11,8 @@ import threading
 import ast
 import time
 
-DEFAULT_RANGEFINDER     =  (400,400) # maximum range of RPLidar
-DEFAULT_RANGEFINDER_STR = "(400,400)" # maximum range of RPLidar
+DEFAULT_RANGEFINDER     =  (400,400) # maximum range of rangefinder
+DEFAULT_RANGEFINDER_STR = "(400,400)" # maximum range of rangefinder
 
 
 class ArduinoNode:

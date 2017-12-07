@@ -7,6 +7,7 @@ BEHAVIOR_TOPIC = "Behavior"  # string enums
 RPLIDAR_TOPIC = "RPLidar"  # [rplidarDatapoint]
 QUAD_TOPIC = "Quad"  # (ail, ele, thr, rud)
 RANGEFINDER_TOPIC = "Rangefinder"  # (left, right)
+UDP_TOPIC = "Udp"
 
 BEHAVIOR_NULL = "NULL" # invalid response
 BEHAVIOR_HOVER = "HOVER" # hover while avoiding objects
@@ -18,8 +19,8 @@ BEHAVIOR_DISARM = "DISARM"
 BEHAVIOR_TEST_RANGEFINDER = "RANGEFINDER"
 BEHAVIOR_TEST_RPLIDAR = "RPLIDAR"
 
-RPLIDAR_DISARM = (0,0,-5,98)
-RPLIDAR_ARM    = (0,0,-5,-98)
+RPLIDAR_DISARM = (0,0,1000,1000)
+RPLIDAR_ARM    = (0,0,1000,2000)
 
 STDIN_INDEX = 0
 STDOUT_INDEX = 1
