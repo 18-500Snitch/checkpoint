@@ -15,7 +15,7 @@ HOVER_CONSTANT = 100 # the value at which the quad is barely hovering
 DROP_CONSTANT = 10 # HOVER_CONSTANT-DROP_CONSTANT = slowly dropping
 HOVER_HEIGHT = 100
 BASE_SPEED = 50 # ele/til = BASE_SPEED/min_distance
-MAX_DISTANCE = 600 # The Distance that the quadcopter will start moving away from things 
+SAFE_BUF = 600 # The Distance that the quadcopter will start moving away from things 
 # finished implementation
 # not tested
 class ControlNode:
@@ -80,30 +80,25 @@ class ControlNode:
             assert False
         self.thrust = thrust
 		
-    # TODO: FIFO
     def respondRPLidar(self):
-        # data = self.topics[constants.RPLIDAR_TOPIC]
+        # read data from rplidar_ros through fifo
         fifo = os.open(PIPE_PATH, os.O_RDONLY)
-        rplidar_data = os.read(fifo, MAX_BUF)
+        rplidar_str = os.read(fifo, MAX_BUF)
         os.close(fifo)
-#        roll = 0
-#        pitch = 0
-#        min_distance = MAX_DISTANCE
-#        angle = -1
-#        for datapoint in data:
-#            if datapoint.valid:
-#                if (min_distance > datapoint.distance):
-#                    min_distance = datapoint.distance
-#                    angle = datapoint.angle
-
-#        if (angle >= 0):
-#            speed = BASE_SPEED
-#            pitch = int(-speed * math.cos(angle))
-#            roll = int(-speed * math.sin(angle))
-#        else:
-#             (roll, pitch) = (0, 0)
-#        self.roll = roll
-#        self.pitch = pitch
+        # parse string into data
+        rplidar_data = [float(data) for data in rplidar_str.split()]
+        angle_min = round(math.degrees(data[0]))
+        angle_max = round(math.degrees(data[1]))
+        rplidar_data = rplidar_data[2:]
+        # find nearest distance and angle
+        near_only = [(theta, d) for (d, theta) in 
+            enumerate(rplidar_data) if(d > 0)]
+        (min_dist, angle) = min(near_only) if(near_only != []) else (None, None)
+        if(angle):
+            angle += angle_min # index offset by angle_min
+            # update pitch and roll
+            (self.pitch, self.roll) = (int(-BASE_SPEED * math.cos(angle)),
+                int(-BASE_SPEED * math.sin(angle))) if(min_dist < SAFE_BUF) else (0, 0)
 
     def filter(self):
         roll = self.roll
