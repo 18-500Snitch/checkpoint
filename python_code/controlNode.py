@@ -7,7 +7,9 @@ import math
 import os
 import sys
 
+# FIFO
 PIPE_PATH = "/tmp/rplidar.fifo"
+MAX_BUF = 4096
 
 HOVER_CONSTANT = 100 # the value at which the quad is barely hovering
 DROP_CONSTANT = 10 # HOVER_CONSTANT-DROP_CONSTANT = slowly dropping
@@ -81,10 +83,9 @@ class ControlNode:
     # TODO: FIFO
     def respondRPLidar(self):
         # data = self.topics[constants.RPLIDAR_TOPIC]
-        fifo = open(path, os.O_RDONLY)
-        for line in fifo:
-            print line
-        fifo.close()
+        fifo = os.open(PIPE_PATH, os.O_RDONLY)
+        rplidar_data = os.read(fifo, MAX_BUF)
+        os.close(fifo)
 #        roll = 0
 #        pitch = 0
 #        min_distance = MAX_DISTANCE
