@@ -28,25 +28,27 @@ class ControlNode:
         arduRange = (self.topics[constants.RANGEFINDER_TOPIC][0] + self.topics[constants.RANGEFINDER_TOPIC][1])/2
 
         if command == constants.CMD_ARM:
-            self.topics[constants.QUAD_TOPIC] = constants.ARM;
+            self.topics[constants.QUAD_TOPIC] = constants.ARM
             self.armStatus = "ARM"
+        elif command == constants.CMD_OFF:
+            self.topics[constants.QUAD_TOPIC] = constants.OFF
         elif command == constants.CMD_DISARM or self.armStatus == "DISARM":
-            self.topics[constants.QUAD_TOPIC] = constants.DISARM;
+            self.topics[constants.QUAD_TOPIC] = constants.DISARM
             self.armStatus = "DISARM"
         elif command == constants.CMD_FLOAT:
-            self.topics[constants.QUAD_TOPIC] = constants.FLOAT;
+            self.topics[constants.QUAD_TOPIC] = constants.FLOAT
         elif command == constants.CMD_FWD:
-            self.topics[constants.QUAD_TOPIC] = constants.LEAN_FWD;
+            self.topics[constants.QUAD_TOPIC] = constants.LEAN_FWD
         elif command == constants.CMD_BCK:
-            self.topics[constants.QUAD_TOPIC] = constants.LEAN_BCK;
+            self.topics[constants.QUAD_TOPIC] = constants.LEAN_BCK
         elif command == constants.CMD_LFT:
-            self.topics[constants.QUAD_TOPIC] = constants.LEAN_LFT;
+            self.topics[constants.QUAD_TOPIC] = constants.LEAN_LFT
         elif command == constants.CMD_RHT:
-            self.topics[constants.QUAD_TOPIC] = constants.LEAN_RHT;
+            self.topics[constants.QUAD_TOPIC] = constants.LEAN_RHT
         elif command == constants.CMD_RISE:
-            self.topics[constants.QUAD_TOPIC] = constants.RISE;
+            self.topics[constants.QUAD_TOPIC[2]] += constants.RISE
         elif command == constants.CMD_DECEND:
-            self.topics[constants.QUAD_TOPIC] = constants.DECEND;
+            self.topics[constants.QUAD_TOPIC[2]] -= constants.DECEND
 		
     def respondRPLidar(self):
         # FIFO
