@@ -1,21 +1,24 @@
-# DONE: stub
-# DONE: implement
-# TODO: test
-
 import constants
 import math
 import os
 import sys
 import re
 
-# FIFO
+# FIFO constants
 PIPE_PATH = "/tmp/rplidar.fifo"
 MAX_BUF = 4096
 
+# respondRPLidar constants
 SAFE_BUF = 0.7 # The Distance that the quadcopter will start moving away from things 
 META = 3 # number of rplidar data points that are not actual data
-# finished implementation
-# not tested
+BASE_SPEED = 50
+
+# control constants
+OFF_THRUST = 800
+ARM_DISARM_THRUST = 900
+MIN_THRUST = 1100
+MAX_THRUST = 1500
+
 class ControlNode:
     def __init__(self, topics):
         self.armStatus = "DISARM"
@@ -30,17 +33,20 @@ class ControlNode:
 
         if self.string_found(constants.CMD_ARM, command):
             self.topics[constants.QUAD_TOPIC] = constants.ARM
-            self.topics[constants.THRUST_TOPIC] = 900
+            self.topics[constants.THRUST_TOPIC] = ARM_DISARM_THRUST
             self.armStatus = "ARM"
         if self.string_found(constants.CMD_OFF, command):
             self.topics[constants.QUAD_TOPIC] = constants.OFF
-            self.topics[constants.THRUST_TOPIC] = 800
+            self.topics[constants.THRUST_TOPIC] = OFF_THRUST
+            self.armStatus = "DISARM"
         if self.string_found(constants.CMD_DISARM, command):
             self.topics[constants.QUAD_TOPIC] = constants.DISARM
-            self.topics[constants.THRUST_TOPIC] = 900
+            self.topics[constants.THRUST_TOPIC] = ARM_DISARM_THRUST
             self.armStatus = "DISARM"
         if self.string_found(constants.CMD_FLOAT, command):
             self.topics[constants.QUAD_TOPIC] = constants.FLOAT
+            if(self.armStatus == "ARM" and self.topics[constants.THRUST_TOPIC] < MIN_THRUST):
+                self.topics[constants.THRUST_TOPIC] = MIN_THRUST
         if self.string_found(constants.CMD_FWD, command):
             self.topics[constants.QUAD_TOPIC] = constants.LEAN_FWD
         if self.string_found(constants.CMD_BCK, command):
@@ -51,6 +57,8 @@ class ControlNode:
             self.topics[constants.QUAD_TOPIC] = constants.LEAN_RHT
         if self.string_found(constants.CMD_RISE, command):
             self.topics[constants.THRUST_TOPIC] += constants.RISE
+            if(self.topics[constants.THRUST_TOPIC] > MAX_THRUST):
+                self.topics[constants.THRUST_TOPIC] = MAX_THRUST
         if self.string_found(constants.CMD_DECEND, command):
             self.topics[constants.THRUST_TOPIC] -= constants.DECEND
 		
@@ -71,9 +79,10 @@ class ControlNode:
         (min_dist, angle) = min(near_only) if(near_only != []) else (None, None)
         if(angle):
             angle = angle_min + (angle * angle_inc) # actual angle
-            # update pitch and roll
-            (self.pitch, self.roll) = (int(-BASE_SPEED * math.cos(angle)),
-                int(-BASE_SPEED * math.sin(angle))) if(min_dist < SAFE_BUF) else (0, 0)
+            # update roll and pitch
+            if(min_dist < SAFE_BUF):
+                self.topics[constants.QUAD_TOPIC[0:2]] = (int(-BASE_SPEED * math.sin(angle)),
+                    int(-BASE_SPEED * math.cos(angle)))
 
     def string_found(self, search_str, msg_str):
         if re.search(r"\b" + re.escape(search_str) + r"\b", msg_str):

@@ -29,6 +29,7 @@ class ArduinoNode:
         pwmArray = self.topics[constants.QUAD_TOPIC]
         msg = str(pwmArray[0])+","+str(pwmArray[1])+","+str(self.topics[constants.THRUST_TOPIC])+","+str(pwmArray[2])+"\n"
 #        msg = "0,0,-5,98\n"
+        print(msg)
         self.ser.write(msg)
         # recieve input
         rangefinder = self.incoming[constants.STDIN_INDEX]

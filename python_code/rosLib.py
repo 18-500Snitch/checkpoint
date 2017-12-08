@@ -7,6 +7,7 @@ class Master:
     def __init__(self, nodes, topics):
         self.nodes = nodes
         self.topics = topics
+        time.sleep(1.0);
     def run(self):
         while True:
             for node in self.nodes:

@@ -11,10 +11,10 @@
 #define sigPin 10  //set PPM signal output pin on the arduino
 
 /*this array holds the servo values for the ppm signal
-  change theese values in your code (usually servo values move between 1000 and 2000)*/
+ change theese values in your code (usually servo values move between 1000 and 2000)*/
 int ppm[CHANNEL_NUMBER];
 
-#define BUF_SIZE 25
+#define BUF_SIZE 20
 char buf[BUF_SIZE];
 
 #define SERIAL_TIMEOUT 1000
@@ -31,30 +31,33 @@ float pingDist = 0;
 //Parse from iiii,iiii,iiii,iiii\n to ints
 void parseToInts(char *ints,int *out)
 {
-    if(strlen(ints) > 21){
-        Serial.println(">DEBUG: TOO LARGE");
-    }
-    char *tokens[4];
-    char *ptr = strtok(ints,",");
-    byte index = 0;
-    while(ptr != NULL)
-    {
-      tokens[index] = ptr;
-      ptr = strtok(NULL,",");
-      index++;
-    }
-    if(index != 4) return;
-    for( int i = 0; i < 4; i++)
+  if(strlen(ints) > 21){
+    Serial.println(">DEBUG: TOO LARGE");
+  }
+  char *tokens[4];
+  char *ptr = strtok(ints,",");
+  byte index = 0;
+  while(ptr != NULL)
+  {
+    tokens[index] = ptr;
+    ptr = strtok(NULL,",");
+    index++;
+  }
+  if(index != 4) return;
+  for( int i = 0; i < 4; i++)
+  {
+    if (out[i] != atoi(tokens[i]))
     {
       out[i] = atoi(tokens[i]);
-    }
+    }  
+  }
 }
 
 void parseSerialToPPM(){
   static long lastMsg;
   static int messageRec = false;
   static int i=0;
-  
+
   // Check that there has been a serial message recently
   if(lastMsg + SERIAL_TIMEOUT < millis())
   {
@@ -69,18 +72,19 @@ void parseSerialToPPM(){
     if (c == '\n'){
       lastMsg = millis();
       messageRec = true;
-    } else {
+    } 
+    else {
       buf[i] = c;
       i++;
     }
   }
-  
+
   if (messageRec){
     messageRec = false;
     i = 0;
     //Serial.print("buf:"); Serial.println(buf);
     parseToInts(buf,ppm);
-  
+
     //Serial.print("parsed:"); 
     //Serial.print((int)ppm[0]); Serial.print(",");
     //Serial.print((int)ppm[1]); Serial.print(","); 
@@ -97,6 +101,10 @@ void ppmSetup(){
   for (int i = 0; i < CHANNEL_NUMBER; i++) {
     ppm[i] = CHANNEL_DEFAULT_VALUE;
   }
+    ppm[0] = 1500;
+    ppm[1] = 1500;
+    ppm[2] = 1000;
+    ppm[3] = 1500;
 
   pinMode(sigPin, OUTPUT);
   digitalWrite(sigPin, !onState);  //set the PPM signal pin to the default state (off)
@@ -125,8 +133,13 @@ void sendRangefinder(){
   oldDistance = pingDist;
   if (oldDistance >= MAX_DISTANCE || oldDistance <= 0){
     Serial.println(">DEBUG: Out of range");
-  } else {
-    Serial.print(">("); Serial.print(oldDistance); Serial.print(","); Serial.print(oldDistance); Serial.print(")");
+  } 
+  else {
+    Serial.print(">("); 
+    Serial.print(oldDistance); 
+    Serial.print(","); 
+    Serial.print(oldDistance); 
+    Serial.print(")");
     Serial.println();
   }
 }
@@ -171,7 +184,8 @@ ISR(TIMER1_COMPA_vect) { //leave this alone
     digitalWrite(sigPin, onState);
     OCR1A = PULSE_LENGTH * 2;
     state = false;
-  } else { //end pulse and calculate when to start the next pulse
+  } 
+  else { //end pulse and calculate when to start the next pulse
     static byte cur_chan_numb;
     static unsigned int calc_rest;
 
@@ -191,3 +205,4 @@ ISR(TIMER1_COMPA_vect) { //leave this alone
     }
   }
 }
+
