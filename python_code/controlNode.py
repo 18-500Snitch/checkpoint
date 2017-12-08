@@ -29,11 +29,14 @@ class ControlNode:
 
         if command == constants.CMD_ARM:
             self.topics[constants.QUAD_TOPIC] = constants.ARM
+            self.topics[constants.THRUST_TOPIC] = 900
             self.armStatus = "ARM"
         elif command == constants.CMD_OFF:
             self.topics[constants.QUAD_TOPIC] = constants.OFF
+            self.topics[constants.THRUST_TOPIC] = 800
         elif command == constants.CMD_DISARM or self.armStatus == "DISARM":
             self.topics[constants.QUAD_TOPIC] = constants.DISARM
+            self.topics[constants.THRUST_TOPIC] = 900
             self.armStatus = "DISARM"
         elif command == constants.CMD_FLOAT:
             self.topics[constants.QUAD_TOPIC] = constants.FLOAT
@@ -46,9 +49,9 @@ class ControlNode:
         elif command == constants.CMD_RHT:
             self.topics[constants.QUAD_TOPIC] = constants.LEAN_RHT
         elif command == constants.CMD_RISE:
-            self.topics[constants.QUAD_TOPIC[2]] += constants.RISE
+            self.topics[constants.THRUST_TOPIC] += constants.RISE
         elif command == constants.CMD_DECEND:
-            self.topics[constants.QUAD_TOPIC[2]] -= constants.DECEND
+            self.topics[constants.THRUST_TOPIC] -= constants.DECEND
 		
     def respondRPLidar(self):
         # FIFO

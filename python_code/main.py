@@ -11,7 +11,8 @@ import arduinoNode
 import udpNode
 
 topics = {constants.RPLIDAR_TOPIC:[],
-          constants.QUAD_TOPIC:(0,0,0,0),
+          constants.QUAD_TOPIC:(0,0,0),
+          constants.THRUST_TOPIC:1375,
           constants.RANGEFINDER_TOPIC:(0,0),
           constants.UDP_TOPIC:[]}
 

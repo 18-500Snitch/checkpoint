@@ -27,7 +27,7 @@ class ArduinoNode:
     def loop(self):
         # send pwm output
         pwmArray = self.topics[constants.QUAD_TOPIC]
-        msg = str(pwmArray[0])+","+str(pwmArray[1])+","+str(pwmArray[2])+","+str(pwmArray[3])+"\n"
+        msg = str(pwmArray[0])+","+str(pwmArray[1])+","+str(self.topics[constants.THRUST]+","+str(pwmArray[2])+"\n"
 #        msg = "0,0,-5,98\n"
         self.ser.write(msg)
         # recieve input
