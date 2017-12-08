@@ -17,7 +17,7 @@ topics = {constants.RPLIDAR_TOPIC:[],
 
 nodes = [arduinoNode.ArduinoNode(topics),
          controlNode.ControlNode(topics),
-         udpNode.UdpNode]
+         udpNode.UdpNode(topics)]
 
 master = rosLib.Master(nodes, topics)
 master.run()

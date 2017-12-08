@@ -17,6 +17,7 @@ int ppm[CHANNEL_NUMBER];
 #define BUF_SIZE 25
 char buf[BUF_SIZE];
 
+#define SERIAL_TIMEOUT 1000
 //================rangefinder stuff==============
 #define TRIGGER_PIN   12
 #define ECHO_PIN      11
@@ -25,7 +26,7 @@ char buf[BUF_SIZE];
 NewPing sonar(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE);
 unsigned int pingSpeed = 50;
 unsigned long pingTimer;
-unsigned int pingDist = 0;
+float pingDist = 0;
 
 //Parse from iiii,iiii,iiii,iiii\n to ints
 void parseToInts(char *ints,int *out)
@@ -50,11 +51,23 @@ void parseToInts(char *ints,int *out)
 }
 
 void parseSerialToPPM(){
+  static long lastMsg;
   static int messageRec = false;
   static int i=0;
+  
+  // Check that there has been a serial message recently
+  if(lastMsg + SERIAL_TIMEOUT < millis())
+  {
+    // If no recent message, disarm the quadcopter
+    ppm[0] = 1500;
+    ppm[1] = 1500;
+    ppm[2] = 1000;
+    ppm[3] = 1000;
+  }
   if (Serial.available()){
     char c = Serial.read();
     if (c == '\n'){
+      lastMsg = millis();
       messageRec = true;
     } else {
       buf[i] = c;

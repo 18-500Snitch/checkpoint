@@ -11,75 +11,42 @@ import sys
 PIPE_PATH = "/tmp/rplidar.fifo"
 MAX_BUF = 4096
 
-HOVER_CONSTANT = 100 # the value at which the quad is barely hovering
-DROP_CONSTANT = 10 # HOVER_CONSTANT-DROP_CONSTANT = slowly dropping
-HOVER_HEIGHT = 100
-BASE_SPEED = 50 # ele/til = BASE_SPEED/min_distance
 SAFE_BUF = 0.7 # The Distance that the quadcopter will start moving away from things 
 META = 3 # number of rplidar data points that are not actual data
 # finished implementation
 # not tested
 class ControlNode:
     def __init__(self, topics):
+        self.armStatus = "DISARM"
         self.topics = topics
-	# positive roll is right
-	# positive pitch is forwards
-	# positive thrust is up
-        (self.roll, self.pitch, self.thrust) = (0, 0, 0)
-        # FIFO
         # only want to create pipe once, should not assume which node creates first
         if not os.path.exists(PIPE_PATH):
             os.mkfifo(PIPE_PATH)
 
     def loop(self):
-        (self.roll,self.pitch,self.thrust) = (0,0,0)
-        command = self.topics[constants.BEHAVIOR_TOPIC]
+        command = self.topics[constants.UDP_TOPIC]
         arduRange = (self.topics[constants.RANGEFINDER_TOPIC][0] + self.topics[constants.RANGEFINDER_TOPIC][1])/2
 
-        if command == constants.BEHAVIOR_OFF:
-            self.topics[constants.QUAD_TOPIC] = constants.RPLIDAR_DISARM
-        elif command == constants.BEHAVIOR_HOVER:
-            self.respondRangefinder(arduRange,command)
-            self.respondRPLidar()
-            self.topics[constants.QUAD_TOPIC] = self.filter()
-        elif command == constants.BEHAVIOR_RESTING:
-            self.respondRangefinder(arduRange,command)
-            self.topics[constants.QUAD_TOPIC] = self.filter()
-        elif command == constants.BEHAVIOR_ARM:
-            self.topics[constants.QUAD_TOPIC] = constants.RPLIDAR_ARM
-        elif command == constants.BEHAVIOR_DISARM:
-            self.topics[constants.QUAD_TOPIC] = constants.RPLIDAR_DISARM
-        elif command == constants.BEHAVIOR_TEST_RANGEFINDER:
-            # hovers at HOVER_HEIGHT without response to rplidar
-            # used for testing the rangefinder control loop
-            self.respondRangefinder(arduRange,command)
-            self.topics[constants.QUAD_TOPIC] = self.filter()
-        elif command == constants.BEHAVIOR_TEST_RPLIDAR:
-            # turn on throttle, but not enough to achieve flight, causing the quadcopter to act as a hovercraft
-            # used for testing the rplidar without achieving flight
-            self.thrust = HOVER_CONSTANT-DROP_CONSTANT
-            self.respondRPLidar()
-            self.topics[constants.QUAD_TOPIC] = self.filter()
-        elif command == constants.BEHAVIOR_RANDOM:
-            assert False # not yet implemented
-        elif command == constants.BEHAVIOR_NULL:
-            assert False # should never happen
-        else:
-            assert False
-
-    def respondRangefinder(self,arduRange,behavior):
-        thrust = 0
-        if behavior == constants.BEHAVIOR_HOVER:
-            thrust = HOVER_HEIGHT - arduRange
-            thrust = thrust + HOVER_CONSTANT
-        elif behavior == constants.BEHAVIOR_RESTING:
-            if (arduRange < 10):
-                thrust = 0
-            elif (arduRange > 10):
-                thrust = HOVER_CONSTANT-DROP_CONSTANT
-        else:
-            assert False
-        self.thrust = thrust
+        if command == constants.CMD_ARM:
+            self.topics[constants.QUAD_TOPIC] = constants.ARM;
+            self.armStatus = "ARM"
+        elif command == constants.CMD_DISARM or self.armStatus == "DISARM":
+            self.topics[constants.QUAD_TOPIC] = constants.DISARM;
+            self.armStatus = "DISARM"
+        elif command == constants.CMD_FLOAT:
+            self.topics[constants.QUAD_TOPIC] = constants.FLOAT;
+        elif command == constants.CMD_FWD:
+            self.topics[constants.QUAD_TOPIC] = constants.LEAN_FWD;
+        elif command == constants.CMD_BCK:
+            self.topics[constants.QUAD_TOPIC] = constants.LEAN_BCK;
+        elif command == constants.CMD_LFT:
+            self.topics[constants.QUAD_TOPIC] = constants.LEAN_LFT;
+        elif command == constants.CMD_RHT:
+            self.topics[constants.QUAD_TOPIC] = constants.LEAN_RHT;
+        elif command == constants.CMD_RISE:
+            self.topics[constants.QUAD_TOPIC] = constants.RISE;
+        elif command == constants.CMD_DECEND:
+            self.topics[constants.QUAD_TOPIC] = constants.DECEND;
 		
     def respondRPLidar(self):
         # FIFO
@@ -101,20 +68,3 @@ class ControlNode:
             # update pitch and roll
             (self.pitch, self.roll) = (int(-BASE_SPEED * math.cos(angle)),
                 int(-BASE_SPEED * math.sin(angle))) if(min_dist < SAFE_BUF) else (0, 0)
-
-    def filter(self):
-        roll = self.roll
-        pitch = self.pitch
-        thrust = self.thrust
-        if(abs(roll) > abs(pitch) and abs(roll) > 100):
-            scaleFactor = abs(roll) / 100
-            roll = roll / scaleFactor
-            pitch = pitch / scaleFactor
-        elif(abs(roll) < abs(pitch) and abs(pitch) > 100):
-            scaleFactor = abs(pitch) / 100
-            roll = roll / scaleFactor
-            pitch = pitch / scaleFactor
-        
-        if thrust > 200: thrust = 200
-
-        return roll, pitch, thrust, 0
