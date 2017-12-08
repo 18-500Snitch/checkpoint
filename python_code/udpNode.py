@@ -13,6 +13,7 @@ class UdpNode:
     def __init__(self, topics):
         self.topics = topics
         self.incoming = ["0\n"]
+        self.topics[constants.UDP_TOPIC] = "0\n"
         UDP_IP = "0.0.0.0"
         UDP_PORT = 5005
         self.sock = socket.socket(socket.AF_INET, # Internet

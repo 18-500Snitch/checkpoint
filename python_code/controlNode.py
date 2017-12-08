@@ -6,6 +6,7 @@ import constants
 import math
 import os
 import sys
+import re
 
 # FIFO
 PIPE_PATH = "/tmp/rplidar.fifo"
@@ -27,30 +28,30 @@ class ControlNode:
         command = self.topics[constants.UDP_TOPIC]
         arduRange = (self.topics[constants.RANGEFINDER_TOPIC][0] + self.topics[constants.RANGEFINDER_TOPIC][1])/2
 
-        if command == constants.CMD_ARM:
+        if self.string_found(constants.CMD_ARM, command):
             self.topics[constants.QUAD_TOPIC] = constants.ARM
             self.topics[constants.THRUST_TOPIC] = 900
             self.armStatus = "ARM"
-        elif command == constants.CMD_OFF:
+        if self.string_found(constants.CMD_OFF, command):
             self.topics[constants.QUAD_TOPIC] = constants.OFF
             self.topics[constants.THRUST_TOPIC] = 800
-        elif command == constants.CMD_DISARM or self.armStatus == "DISARM":
+        if self.string_found(constants.CMD_DISARM, command):
             self.topics[constants.QUAD_TOPIC] = constants.DISARM
             self.topics[constants.THRUST_TOPIC] = 900
             self.armStatus = "DISARM"
-        elif command == constants.CMD_FLOAT:
+        if self.string_found(constants.CMD_FLOAT, command):
             self.topics[constants.QUAD_TOPIC] = constants.FLOAT
-        elif command == constants.CMD_FWD:
+        if self.string_found(constants.CMD_FWD, command):
             self.topics[constants.QUAD_TOPIC] = constants.LEAN_FWD
-        elif command == constants.CMD_BCK:
+        if self.string_found(constants.CMD_BCK, command):
             self.topics[constants.QUAD_TOPIC] = constants.LEAN_BCK
-        elif command == constants.CMD_LFT:
+        if self.string_found(constants.CMD_LFT, command):
             self.topics[constants.QUAD_TOPIC] = constants.LEAN_LFT
-        elif command == constants.CMD_RHT:
+        if self.string_found(constants.CMD_RHT, command):
             self.topics[constants.QUAD_TOPIC] = constants.LEAN_RHT
-        elif command == constants.CMD_RISE:
+        if self.string_found(constants.CMD_RISE, command):
             self.topics[constants.THRUST_TOPIC] += constants.RISE
-        elif command == constants.CMD_DECEND:
+        if self.string_found(constants.CMD_DECEND, command):
             self.topics[constants.THRUST_TOPIC] -= constants.DECEND
 		
     def respondRPLidar(self):
@@ -73,3 +74,8 @@ class ControlNode:
             # update pitch and roll
             (self.pitch, self.roll) = (int(-BASE_SPEED * math.cos(angle)),
                 int(-BASE_SPEED * math.sin(angle))) if(min_dist < SAFE_BUF) else (0, 0)
+
+    def string_found(self, search_str, msg_str):
+        if re.search(r"\b" + re.escape(search_str) + r"\b", msg_str):
+            return True
+        return False
