@@ -22,16 +22,16 @@ UDP_TOPIC = "Udp"
 #BEHAVIOR_TEST_RPLIDAR = "RPLIDAR"
 
 # UDP messages
-CMD_ARM = "A\n"
-CMD_DISARM = "D\n"
-CMD_FLOAT = "0\n"
-CMD_FWD = "UP\n"
-CMD_BCK = "DN\n"
-CMD_LFT = "LT\n"
-CMD_RHT = "RT\n"
-CMD_RISE = " \n"
-CMD_DECEND = "b\n"
-CMD_OFF = "o\n"
+CMD_ARM = "A"
+CMD_DISARM = "D"
+CMD_FLOAT = "0"
+CMD_FWD = "UP"
+CMD_BCK = "DN"
+CMD_LFT = "LT"
+CMD_RHT = "RT"
+CMD_RISE = "SP"
+CMD_DECEND = "b"
+CMD_OFF = "o"
 
 # Control Constants
 DISARM = (1500,1500,1000)
